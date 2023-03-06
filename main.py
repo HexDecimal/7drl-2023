@@ -35,7 +35,7 @@ def main() -> None:
         tileset=tileset,
         width=1280,
         height=720,
-        title=None,
+        title="7drl-2023",
         vsync=True,
     ) as g.context:
         g.world = game.world_tools.new_world()
