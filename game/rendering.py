@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from tcod.ec import ComponentDict
 
 import game.actor_tools
-from game.components import Context, Graphic, MapFeatures, Position
+from game.components import Context, Graphic, MapFeatures, MapInfo, Position
 from game.map import Map
 from game.map_attrs import a_tiles
 from game.messages import MessageLog
@@ -43,12 +43,13 @@ def render_all(world: ComponentDict, console: tcod.console.Console) -> None:
 def render_map(world: ComponentDict, out: NDArray[Any]) -> None:
     """Render the active world map, showing visible and remembered tiles/objects."""
     map = world[Context].active_map[Map]
+    map_info = world[Context].active_map[MapInfo]
     player = world[Context].player
     tiles_db = world[TileDB]
-    player_pos = player[Position]
     player_memory = game.actor_tools.get_memory(world, player)
     player_fov = game.actor_tools.compute_fov(world, player)
-    camera_ij = tcod.camera.get_camera(out.shape, player_pos.yx, ((map.height, map.width), 0.5))
+    map_info.camera_vector = Position(*tcod.camera.get_camera(out.T.shape, map_info.camera_center.xy))
+    camera_ij = map_info.camera_vector.yx
 
     screen_slice, world_slice = tcod.camera.get_slices(out.shape, (map.height, map.width), camera_ij)
     world_view = map[a_tiles][world_slice]
@@ -78,8 +79,15 @@ def render_map(world: ComponentDict, out: NDArray[Any]) -> None:
     memory_graphics["fg"] //= 2
     memory_graphics["bg"] //= 2
 
+    full_bright = True  # If True show whole map as visible.
+
     out[screen_slice] = np.select(
-        [player_fov.visible[world_slice], player_memory.tiles[world_slice] != 0],
+        [full_bright or player_fov.visible[world_slice], player_memory.tiles[world_slice] != 0],
         [visible_graphics, memory_graphics],
         SHROUD,
     )
+    if map_info.cursor:
+        cursor_x = map_info.cursor.x - camera_ij[1]
+        cursor_y = map_info.cursor.y - camera_ij[0]
+        if 0 <= cursor_x < out.shape[1] and 0 <= cursor_y < out.shape[0]:
+            out[["fg", "bg"]][cursor_y, cursor_x] = (0x0, 0x0, 0x0), (0xFF, 0xFF, 0xFF)

@@ -86,3 +86,4 @@ def init(world: ComponentDict) -> None:
     tile_db.register("", graphic=(ord("?"), (0xFF, 0xFF, 0xFF), (0xFF, 0x0, 0xFF)), transparent=True, walk_cost=1)
     tile_db.register("floor", graphic=(ord("."), (0x44, 0x44, 0x44), (0x0, 0x0, 0x0)), transparent=True, walk_cost=1)
     tile_db.register("wall", graphic=(ord(" "), (0xFF, 0xFF, 0xFF), (0x88, 0x88, 0x88)), transparent=False, walk_cost=0)
+    tile_db.register("plains", graphic=(ord(","), (0xFF, 0xFF, 0xFF), (0x0, 0x44, 0x0)), transparent=True, walk_cost=2)

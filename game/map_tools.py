@@ -6,7 +6,7 @@ from tcod.ec import ComponentDict
 
 import game.mapgen.caves
 from game import map_attrs
-from game.components import Context, Graphic, MapDict, MapFeatures, Position, Stairway
+from game.components import Context, Graphic, MapDict, MapFeatures, MapInfo, Position, Stairway
 from game.map import Map, MapKey
 from game.tiles import TileDB
 
@@ -45,6 +45,7 @@ def new_map(world: ComponentDict, width: int, height: int) -> ComponentDict:
     map[map_attrs.a_tiles][1:-1, 1:-1] = tile_db["floor"]
     map_entity = ComponentDict([map])
     map_entity[MapFeatures] = MapFeatures()
+    map_entity[MapInfo] = MapInfo()
     return map_entity
 
 

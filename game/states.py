@@ -2,6 +2,7 @@ from typing import Callable, Iterable
 
 import attrs
 import tcod
+import tcod.camera
 
 import g
 import game.action
@@ -9,7 +10,7 @@ import game.actions
 import game.actor_tools
 import game.commands
 import game.rendering
-from game.components import Context, Direction
+from game.components import Context, Direction, MapInfo, Position
 from game.messages import MessageLog
 from game.sched import Ticket
 from game.state import Reset, State, StateResult
@@ -48,6 +49,41 @@ class InGame(State):
                 world[MessageLog].append(reason)
             case _:
                 raise NotImplementedError()
+        return None
+
+    def on_draw(self, console: tcod.Console) -> None:
+        game.rendering.render_all(g.world, console)
+
+
+class Overworld:
+    def on_event(self, event: tcod.event.Event) -> StateResult:
+        match event:
+            case tcod.event.KeyDown():
+                command = game.commands.keybindings.parse(event=event, enum=game.commands.InGame)
+                if command:
+                    return self.on_command(command)
+            case tcod.event.MouseButtonDown(button=tcod.event.BUTTON_RIGHT):
+                tcod.lib.SDL_CaptureMouse(True)
+            case tcod.event.MouseMotion(motion=motion, position=position, state=state):
+                map_info = g.world[Context].active_map[MapInfo]
+                map_info.cursor = map_info.camera_vector + Position(position.x, position.y)
+                if state & tcod.event.BUTTON_RMASK:
+                    map_info.camera_center -= motion
+                    map_info.cursor -= motion
+            case tcod.event.WindowEvent(type="WindowLeave"):
+                g.world[Context].active_map[MapInfo].cursor = None
+            case tcod.event.Quit():
+                raise SystemExit()
+        return None
+
+    def on_command(self, command: game.commands.InGame) -> StateResult:
+        match command.value:
+            case game.commands.MoveDir(x=dx, y=dy):
+                map_info = g.world[Context].active_map[MapInfo]
+                if map_info.cursor is None:
+                    map_info.cursor = map_info.camera_center
+                map_info.cursor += (dx, dy)
+                map_info.camera_center = map_info.cursor
         return None
 
     def on_draw(self, console: tcod.Console) -> None:
@@ -126,7 +162,7 @@ class MainMenu(Menu):
         )
 
     def new_game(self) -> StateResult:
-        return Reset(InGame())
+        return Reset(Overworld())
 
     def quit(self) -> StateResult:
         raise SystemExit()

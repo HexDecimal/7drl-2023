@@ -73,5 +73,15 @@ class MapFeatures:
     features: list[ComponentDict] = Factory(list)
 
 
+@attrs.define()
+class MapInfo:
+    camera_center: Position = Position(0, 0)
+    """Camera center position."""
+    camera_vector: Position = Position(0, 0)
+    """Camera world to screen offset of the last render."""
+    cursor: Position | None = None
+    """Cursor world position."""
+
+
 class MapDict(dict[MapKey, ComponentDict]):
     pass
