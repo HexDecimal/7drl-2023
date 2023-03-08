@@ -48,6 +48,8 @@ def main() -> None:
                 event = g.context.convert_event(event)
                 handle_state(g.state[-1].on_event(event))
                 match event:
+                    case tcod.event.MouseButtonDown():
+                        tcod.lib.SDL_CaptureMouse(True)
                     case tcod.event.MouseButtonUp():
                         if tcod.event.get_mouse_state().state == 0:
                             tcod.lib.SDL_CaptureMouse(False)

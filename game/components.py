@@ -71,6 +71,7 @@ class Stairway:
 @attrs.define()
 class MapFeatures:
     features: list[ComponentDict] = Factory(list)
+    sites: dict[Position, ComponentDict] = Factory(dict)
 
 
 @attrs.define()

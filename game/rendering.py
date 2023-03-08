@@ -67,6 +67,13 @@ def render_map(world: ComponentDict, out: NDArray[Any]) -> None:
             graphic = obj[Graphic]
             visible_graphics[["ch", "fg"]][screen_y, screen_x] = graphic.ch, graphic.fg
 
+    for pos, obj in world[Context].active_map[MapFeatures].sites.items():
+        screen_x = pos.x - camera_ij[1] - screen_slice[1].start
+        screen_y = pos.y - camera_ij[0] - screen_slice[0].start
+        if 0 <= screen_x < visible_graphics.shape[1] and 0 <= screen_y < visible_graphics.shape[0]:
+            graphic = obj[Graphic]
+            visible_graphics[["ch", "fg"]][screen_y, screen_x] = graphic.ch, graphic.fg
+
     memory_graphics = tiles_db.data["graphic"][player_memory.tiles[world_slice]]
 
     for pos, obj in player_memory.objs.items():
