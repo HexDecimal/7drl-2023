@@ -1,8 +1,9 @@
 from typing import Callable, Iterable
 
 import attrs
-import tcod
 import tcod.camera
+import tcod.console
+import tcod.event
 from tcod.ec import ComponentDict
 
 import g
@@ -52,7 +53,7 @@ class InGame(State):
                 raise NotImplementedError()
         return None
 
-    def on_draw(self, console: tcod.Console) -> None:
+    def on_draw(self, console: tcod.console.Console) -> None:
         game.rendering.render_all(g.world, console)
 
 
@@ -91,7 +92,7 @@ class Overworld:
                 return Push(DebugQuery())
         return None
 
-    def on_draw(self, console: tcod.Console) -> None:
+    def on_draw(self, console: tcod.console.Console) -> None:
         game.rendering.render_all(g.world, console)
 
 
@@ -157,7 +158,7 @@ class Menu(State):
                 return self.on_cancel()
         return None
 
-    def on_draw(self, console: tcod.Console) -> None:
+    def on_draw(self, console: tcod.console.Console) -> None:
         this_index = g.state.index(self)
         if this_index > 0:
             g.state[this_index - 1].on_draw(console)
@@ -193,27 +194,27 @@ class DebugQuery(Menu):
         screen_pos = Position(5, 5)
         if map_info.cursor is not None:
             screen_pos = map_info.cursor - map_info.camera_vector
+        options = [
+            MenuItem("Build: Town", self.b_town),
+            MenuItem("Debug: Cave", self.d_cave),
+            MenuItem("Debug: Node", self.d_node),
+        ]
         super().__init__(
-            [
-                MenuItem("Build: Housing", self.B_house),
-                MenuItem("Build: Tower", self.b_tower),
-                MenuItem("Build: Farm", self.b_farm),
-            ],
+            options,
             x=screen_pos.x,
             y=screen_pos.y,
         )
 
-    def B_house(self) -> StateResult:
+    def b_town(self) -> StateResult:
         g.world[Context].active_map[MapFeatures].sites[self.cursor] = ComponentDict([Graphic(ord("#"))])
         return Pop()
 
-    def b_tower(self) -> StateResult:
-        g.world[Context].active_map[MapFeatures].sites[self.cursor] = ComponentDict([Graphic(ord("T"))])
+    def d_cave(self) -> StateResult:
+        g.world[Context].active_map[MapFeatures].sites[self.cursor] = ComponentDict([Graphic(ord(">"))])
         return Pop()
 
-    def b_farm(self) -> StateResult:
-        # g.world[Context].active_map[MapFeatures].sites[self.cursor] = ComponentDict([Graphic(ord("≈"))])
-        g.world[Context].active_map[MapFeatures].sites[self.cursor] = ComponentDict([Graphic(ord("="))])
+    def d_node(self) -> StateResult:
+        g.world[Context].active_map[MapFeatures].sites[self.cursor] = ComponentDict([Graphic(ord("*"))])
         return Pop()
 
     def on_cancel(self) -> StateResult:

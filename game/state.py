@@ -3,14 +3,15 @@ from __future__ import annotations
 from typing import Protocol
 
 import attrs
-import tcod
+import tcod.console
+import tcod.event
 
 
 class State(Protocol):
     def on_event(self, event: tcod.event.Event) -> StateResult:
         pass
 
-    def on_draw(self, console: tcod.Console) -> None:
+    def on_draw(self, console: tcod.console.Console) -> None:
         pass
 
 

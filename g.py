@@ -1,4 +1,4 @@
-import tcod
+import tcod.context
 import tcod.ec
 
 import game.state

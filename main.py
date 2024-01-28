@@ -3,7 +3,7 @@ import logging
 import sys
 import warnings
 
-import tcod
+from tcod import tcod
 
 import g
 import game.state
